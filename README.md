@@ -4,6 +4,10 @@ WebSocket server to connect ICT's bill acceptor, coin acceptor and coin dispense
 
 You can see usage example in `html/index.html`.
 
+```
+ict -address 127.0.0.1:12345 -ba /dev/ttyS0 -mh /dev/ttyS1 -uca /dev/ttyS2 -serve
+```
+
 ## Bill Acceptor
 
 ```js

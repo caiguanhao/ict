@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 	"net/http"
+
+	"github.com/caiguanhao/ict/html"
 )
 
 func main() {
@@ -11,7 +13,7 @@ func main() {
 	billAcceptor := flag.String("ba", "", "bill acceptor device, optional")
 	uca := flag.String("uca", "", "uca device, optional")
 	mh := flag.String("mh", "", "mini hopper device, optional")
-	serve := flag.Bool("serve", false, "whether to serve html")
+	serve := flag.Bool("serve", false, "whether to serve index.html")
 	flag.Parse()
 
 	if *billAcceptor != "" {
@@ -32,7 +34,7 @@ func main() {
 				http.NotFound(w, r)
 				return
 			}
-			http.ServeFile(w, r, "html/index.html")
+			w.Write([]byte(html.Index()))
 		})
 		log.Println("listening", "http://"+*address)
 	} else {

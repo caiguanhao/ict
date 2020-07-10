@@ -1,4 +1,7 @@
-<html>
+package html
+
+func Index() string {
+	return `<html>
 <head>
 <title>ICT</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
@@ -234,3 +237,5 @@ document.querySelector('#mh_empty').addEventListener('click', () => {
 </script>
 </body>
 </html>
+`
+}

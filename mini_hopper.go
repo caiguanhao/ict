@@ -137,7 +137,7 @@ func giveChange() {
 		}
 		data = append(data, buf[:n]...)
 
-		if data != nil && mhGenerateChecksum(data[:len(data)-1]) == data[len(data)-1] {
+		if data != nil && len(data) > 3 && mhGenerateChecksum(data[:len(data)-1]) == data[len(data)-1] {
 			log.Printf("mini hopper received %x", data)
 			command := data[3]
 			s, ok := mhByte2Status[command]

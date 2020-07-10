@@ -10,6 +10,8 @@ ict -address 127.0.0.1:12345 -ba /dev/ttyS0 -mh /dev/ttyS1 -uca /dev/ttyS2 -serv
 
 ## Bill Acceptor
 
+![Bill Acceptor](https://user-images.githubusercontent.com/1284703/87120763-d499b880-c2b3-11ea-8744-54605eecb461.gif)
+
 ```js
 const ba = new WebSocket('ws://localhost:12345/ict/bill-acceptor')
 ba.send(JSON.stringify({ action: 'enable' }))
@@ -23,6 +25,8 @@ ba.send(JSON.stringify({ action: 'enable' }))
 
 ## Coin Acceptor
 
+![Coin Acceptor](https://user-images.githubusercontent.com/1284703/87120765-d5324f00-c2b3-11ea-832c-876f215e5c69.gif)
+
 ```js
 const uca = new WebSocket('ws://localhost:12345/ict/uca')
 uca.send(JSON.stringify({ action: 'enable' }))
@@ -34,6 +38,8 @@ uca.send(JSON.stringify({ action: 'enable' }))
 
 ## Coin Dispenser
 
+![Coin Dispenser](https://user-images.githubusercontent.com/1284703/87120761-d2cff500-c2b3-11ea-8f70-161141ebe09c.gif)
+
 ```js
 const mh = new WebSocket('ws://localhost:12345/ict/mini-hopper')
 mh.send(JSON.stringify({ action: 'payout+message', value: 2 }))
@@ -42,5 +48,11 @@ mh.send(JSON.stringify({ action: 'payout+message', value: 2 }))
 // receive: {"action":"status","status":"payout-once"}
 // receive: {"action":"status","status":"payout-finished"}
 ```
+
+## Windows
+
+You can use `ict` in Windows by specifying COM ports:
+
+![Windows](https://user-images.githubusercontent.com/1284703/87120788-e713f200-c2b3-11ea-81b5-07c7c0d87d59.png)
 
 LICENSE: MIT

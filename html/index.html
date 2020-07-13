@@ -40,6 +40,14 @@ button {
       <td><input id="ba_type_3" type="number" min="1" step="1" value="20" /></td>
     </tr>
     <tr>
+      <td>BA Type 4</td>
+      <td><input id="ba_type_4" type="number" min="1" step="1" value="50" /></td>
+    </tr>
+    <tr>
+      <td>BA Type 5</td>
+      <td><input id="ba_type_5" type="number" min="1" step="1" value="100" /></td>
+    </tr>
+    <tr>
       <td></td>
       <td><label><input id="ba_auto" type="checkbox" checked /> Auto Accept</label></td>
       <td></td>
@@ -111,6 +119,12 @@ ba.addEventListener('message', (e) => {
     } else if (json.status === 'done') {
       document.querySelector('#total').value = (+document.querySelector('#total').value) + (+document.querySelector('#ba_type_' + json.type).value)
     }
+  } else if (json.action === 'init') {
+    [ 'enable', 'disable', 'reset', 'status', 'accept', 'reject', 'hold', 'info' ].forEach((a) => {
+      if (!json.supported_actions.includes(a)) {
+        document.querySelector('#ba_' + a).disabled = true
+      }
+    })
   }
 })
 

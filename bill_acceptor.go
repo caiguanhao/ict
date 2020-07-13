@@ -21,10 +21,27 @@ type (
 		Status string `json:"status"`
 		Type   *int   `json:"type"`
 	}
+
+	billAcceptorProtocol int
+)
+
+const (
+	bapICT002U billAcceptorProtocol = iota
+	bapICT106U
 )
 
 var (
-	billAcceptorPort serial.Port
+	billAcceptorPort  serial.Port
+	baCurrentProtocol billAcceptorProtocol
+
+	baProtocols = map[string]billAcceptorProtocol{
+		"ICT002U": bapICT002U,
+		"ICT106U": bapICT106U,
+	}
+	baProtocolsRev = map[billAcceptorProtocol]string{
+		bapICT002U: "ICT002U",
+		bapICT106U: "ICT106U",
+	}
 
 	baUpgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -53,21 +70,30 @@ var (
 		0x11: "reject",
 	}
 
-	baAction2Byte = map[string]byte{
-		"enable":  0x3e,
-		"disable": 0x5e,
-		"reset":   0x30,
-		"status":  0x0c,
-		"accept":  0x02,
-		"reject":  0x0f,
-		"hold":    0x18,
-		"info":    0x5b,
+	baAction2Byte = map[billAcceptorProtocol]map[string]byte{
+		bapICT002U: {
+			"enable":  0x3e,
+			"disable": 0x5e,
+			"status":  0x0c,
+			"accept":  0x02,
+			"reject":  0x0f,
+		},
+		bapICT106U: {
+			"enable":  0x3e,
+			"disable": 0x5e,
+			"reset":   0x30,
+			"status":  0x0c,
+			"accept":  0x02,
+			"reject":  0x0f,
+			"hold":    0x18,
+			"info":    0x5b,
+		},
 	}
 
 	lastType *int
 )
 
-func startBillAcceptor(device string) {
+func startBillAcceptor(device, protocol string) {
 	var err error
 	billAcceptorPort, err = serial.Open(device, &serial.Mode{
 		BaudRate: 9600,
@@ -79,6 +105,11 @@ func startBillAcceptor(device string) {
 		log.Println("opened bill acceptor device", device)
 	} else {
 		log.Fatal(err)
+	}
+	if proto, ok := baProtocols[protocol]; ok {
+		baCurrentProtocol = proto
+	} else {
+		log.Fatal("unsupported bill acceptor protocol", protocol)
 	}
 	go acceptBills()
 	http.HandleFunc("/ict/bill-acceptor", baServer)
@@ -95,6 +126,18 @@ func baServer(w http.ResponseWriter, r *http.Request) {
 		c.Close()
 	}()
 	baClients[c] = true
+
+	actions := []string{}
+	for action := range baAction2Byte[baCurrentProtocol] {
+		actions = append(actions, action)
+	}
+	b, _ := json.Marshal(struct {
+		Action           string   `json:"action"`
+		Protocol         string   `json:"protocol"`
+		SupportedActions []string `json:"supported_actions"`
+	}{"init", baProtocolsRev[baCurrentProtocol], actions})
+	c.WriteMessage(websocket.TextMessage, b)
+
 	for {
 		_, data, err := c.ReadMessage()
 		if err != nil {
@@ -108,7 +151,7 @@ func baServer(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			break
 		}
-		if b, ok := baAction2Byte[msg.Action]; ok {
+		if b, ok := baAction2Byte[baCurrentProtocol][msg.Action]; ok {
 			log.Printf("bill acceptor writing %x", []byte{b})
 			_, err := billAcceptorPort.Write([]byte{b})
 			if err != nil {
@@ -163,7 +206,13 @@ func acceptBills() {
 				data = nil
 				lastType = nil
 				continue
-			} else if len(data) > 2 && bytes.Equal(data[:2], []byte{0x81, 0x8f}) {
+			} else if baCurrentProtocol == bapICT002U && len(data) > 1 && data[0] == 0x81 {
+				t := int(data[1]) - int(0x40)
+				lastType = &t
+				baReplyStatus("validated")
+				data = nil
+				continue
+			} else if baCurrentProtocol == bapICT106U && len(data) > 2 && bytes.Equal(data[:2], []byte{0x81, 0x8f}) {
 				t := int(data[2]) - int(0x40)
 				lastType = &t
 				baReplyStatus("validated")

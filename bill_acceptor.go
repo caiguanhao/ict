@@ -70,23 +70,23 @@ var (
 		0x11: "reject",
 	}
 
-	baAction2Byte = map[billAcceptorProtocol]map[string]byte{
+	baAction2Bytes = map[billAcceptorProtocol]map[string][]byte{
 		bapICT002U: {
-			"enable":  0x3e,
-			"disable": 0x5e,
-			"status":  0x0c,
-			"accept":  0x02,
-			"reject":  0x0f,
+			"enable":  {0x3e, 0x0c}, // reply status immediately
+			"disable": {0x5e, 0x0c}, // reply status immediately
+			"status":  {0x0c},
+			"accept":  {0x02},
+			"reject":  {0x0f},
 		},
 		bapICT106U: {
-			"enable":  0x3e,
-			"disable": 0x5e,
-			"reset":   0x30,
-			"status":  0x0c,
-			"accept":  0x02,
-			"reject":  0x0f,
-			"hold":    0x18,
-			"info":    0x5b,
+			"enable":  {0x3e},
+			"disable": {0x5e},
+			"reset":   {0x30},
+			"status":  {0x0c},
+			"accept":  {0x02},
+			"reject":  {0x0f},
+			"hold":    {0x18},
+			"info":    {0x5b},
 		},
 	}
 
@@ -128,7 +128,7 @@ func baServer(w http.ResponseWriter, r *http.Request) {
 	baClients[c] = true
 
 	actions := []string{}
-	for action := range baAction2Byte[baCurrentProtocol] {
+	for action := range baAction2Bytes[baCurrentProtocol] {
 		actions = append(actions, action)
 	}
 	b, _ := json.Marshal(struct {
@@ -151,9 +151,9 @@ func baServer(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			break
 		}
-		if b, ok := baAction2Byte[baCurrentProtocol][msg.Action]; ok {
-			log.Printf("bill acceptor writing %x", []byte{b})
-			_, err := billAcceptorPort.Write([]byte{b})
+		if b, ok := baAction2Bytes[baCurrentProtocol][msg.Action]; ok {
+			log.Printf("bill acceptor writing %x", b)
+			_, err := billAcceptorPort.Write(b)
 			if err != nil {
 				log.Println(err)
 			}

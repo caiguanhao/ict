@@ -94,6 +94,11 @@ var (
 )
 
 func startBillAcceptor(device, protocol string) {
+	if proto, ok := baProtocols[protocol]; ok {
+		baCurrentProtocol = proto
+	} else {
+		log.Fatalln("fatal: unsupported bill acceptor protocol", protocol)
+	}
 	var err error
 	billAcceptorPort, err = serial.Open(device, &serial.Mode{
 		BaudRate: 9600,
@@ -102,14 +107,9 @@ func startBillAcceptor(device, protocol string) {
 		StopBits: serial.OneStopBit,
 	})
 	if err == nil {
-		log.Println("opened bill acceptor device", device)
+		log.Println("opened bill acceptor device", device, "using protocol", protocol)
 	} else {
 		log.Fatal(err)
-	}
-	if proto, ok := baProtocols[protocol]; ok {
-		baCurrentProtocol = proto
-	} else {
-		log.Fatal("unsupported bill acceptor protocol", protocol)
 	}
 	go acceptBills()
 	http.HandleFunc("/ict/bill-acceptor", baServer)

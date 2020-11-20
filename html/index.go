@@ -10,11 +10,11 @@ table {
   margin-bottom: 10px;
 }
 
-input[type="number"] {
+input[type="number"], select {
   width: 100px;
 }
 
-input {
+input, select {
   font-size: 20px;
 }
 
@@ -26,6 +26,15 @@ button {
 </head>
 <body>
   <table>
+    <tr>
+      <td>Currency</td>
+      <td>
+        <select id="ba_currency">
+          <option value="USD" data-value="1,5,10,20,50,100">USD</option>
+          <option value="NZD" data-value="5,10,20,50,0,0">NZD</option>
+        </select>
+      </td>
+    </tr>
     <tr>
       <td>BA Type 0</td>
       <td><input id="ba_type_0" type="number" min="1" step="1" value="1" /></td>
@@ -133,6 +142,14 @@ ba.addEventListener('message', (e) => {
 
 document.querySelector('#zero').addEventListener('click', () => {
   document.querySelector('#total').value = 0
+})
+
+document.querySelector('#ba_currency').addEventListener('change', (e) => {
+  let option = document.querySelector('#ba_currency option[value="' + e.target.value + '"]')
+  let values = option.dataset.value.split(',')
+  values.forEach((value, i) => {
+    document.querySelector('#ba_type_' + i).value = value
+  })
 })
 
 document.querySelector('#ba_enable').addEventListener('click', () => {

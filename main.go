@@ -11,7 +11,7 @@ import (
 func main() {
 	address := flag.String("address", "127.0.0.1:12345", "address to listen to")
 	billAcceptor := flag.String("ba", "", "bill acceptor device, optional")
-	billAcceptorProtocol := flag.String("bap", "ICT106U", "bill acceptor protocol (ICT002U, ICT106U)")
+	billAcceptorProtocol := flag.String("bap", "ICT106U", "bill acceptor protocol (ICT002U, ICT104U, ICT106U)")
 	uca := flag.String("uca", "", "uca device, optional")
 	mh := flag.String("mh", "", "mini hopper device, optional")
 	serve := flag.Bool("serve", false, "whether to serve index.html")

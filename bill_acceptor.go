@@ -27,6 +27,7 @@ type (
 
 const (
 	bapICT002U billAcceptorProtocol = iota
+	bapICT104U
 	bapICT106U
 )
 
@@ -36,10 +37,12 @@ var (
 
 	baProtocols = map[string]billAcceptorProtocol{
 		"ICT002U": bapICT002U,
+		"ICT104U": bapICT104U,
 		"ICT106U": bapICT106U,
 	}
 	baProtocolsRev = map[billAcceptorProtocol]string{
 		bapICT002U: "ICT002U",
+		bapICT104U: "ICT104U",
 		bapICT106U: "ICT106U",
 	}
 
@@ -77,6 +80,15 @@ var (
 			"status":  {0x0c},
 			"accept":  {0x02},
 			"reject":  {0x0f},
+		},
+		bapICT104U: {
+			"enable":  {0x3e, 0x0c}, // reply status immediately
+			"disable": {0x5e, 0x0c}, // reply status immediately
+			"reset":   {0x30},
+			"status":  {0x0c},
+			"accept":  {0x02},
+			"reject":  {0x0f},
+			"hold":    {0x18},
 		},
 		bapICT106U: {
 			"enable":  {0x3e},
@@ -206,7 +218,7 @@ func acceptBills() {
 				data = nil
 				lastType = nil
 				continue
-			} else if baCurrentProtocol == bapICT002U && len(data) > 1 && data[0] == 0x81 {
+			} else if (baCurrentProtocol == bapICT002U || baCurrentProtocol == bapICT104U) && len(data) > 1 && data[0] == 0x81 {
 				t := int(data[1]) - int(0x40)
 				lastType = &t
 				baReplyStatus("validated")

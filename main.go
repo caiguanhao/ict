@@ -2,10 +2,15 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/caiguanhao/ict/html"
+)
+
+var (
+	version = "unknown"
 )
 
 func main() {
@@ -15,7 +20,13 @@ func main() {
 	uca := flag.String("uca", "", "uca device, optional")
 	mh := flag.String("mh", "", "mini hopper device, optional")
 	serve := flag.Bool("serve", false, "whether to serve index.html")
+	showVersion := flag.Bool("version", false, "show version and exit")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Println(version)
+		return
+	}
 
 	if *billAcceptor != "" {
 		startBillAcceptor(*billAcceptor, *billAcceptorProtocol)

@@ -1,6 +1,12 @@
 VERSION = $(shell date -u +%Y%m%d%H%M%S)-$(shell git rev-parse --short HEAD)
 
-ict: *.go
+ict: *.go html/*.go html/file.go
+	go build -ldflags "-X main.version=$(VERSION)" -v
+
+html/file.go: html/index.html
+	go generate -x
+
+dist: *.go html/*.go
 	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -v && \
 	ict_amd64_md5=$$(openssl md5 ict | awk '{print $$2}') && \
 	tar cfvz ict-$(VERSION)-amd64.tar.gz ict && \

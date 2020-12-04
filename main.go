@@ -1,5 +1,7 @@
 package main
 
+//go:generate go generate -x ./html
+
 import (
 	"flag"
 	"fmt"
